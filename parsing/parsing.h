@@ -8,24 +8,6 @@
 #include<stdlib.h>
 #include "../minishell.h"
 
-
-
-// typedef enum
-// {
-// 	CMD,
-// 	PIPE,
-// 	REDIR,
-// }						node_type;
-// typedef struct s_token
-// {
-// 	int					len;
-// 	int					index;
-// 	node_type			type;
-// 	char				*str;
-// 	struct s_token		*prev;
-// 	struct s_token		*next;
-// }						t_token;
-
 typedef struct s_env
 {
         char *key;

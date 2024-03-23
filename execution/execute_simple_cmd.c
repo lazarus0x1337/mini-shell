@@ -1,23 +1,6 @@
 #include "execute.h"
 #include "../environnement/env.h"
-int is_builtin(t_cmd_node *cmd)
-{
-    if (cmd && ft_strncmp(cmd->executable, "echo", 5) == 0)
-        return (1);
-    if (cmd && ft_strncmp(cmd->executable, "cd", 3) == 0)
-        return (1);
-    if (cmd && ft_strncmp(cmd->executable, "pwd", 4) == 0)
-        return (1);
-    if (cmd && ft_strncmp(cmd->executable, "export", 7) == 0)
-        return (1);
-    if (cmd && ft_strncmp(cmd->executable, "unset", 6) == 0)
-        return (1);
-    if (cmd && ft_strncmp(cmd->executable, "env", 4) == 0)
-        return (1);
-    if (cmd && ft_strncmp(cmd->executable, "exit", 5) == 0)
-        return (1);
-    return (0);
-}
+#include "../builtins/builtin.h"
 
 int ft_error(char *cmd, char *error)
 {
@@ -29,22 +12,23 @@ int ft_error(char *cmd, char *error)
     ft_putstr_fd("\n", 2);
     return (127);
 }
-void execute_builtin(t_env *env, t_cmd_node *cmd)
-{
-	return ;
-}
+
 
 void execute_simple_cmd(t_env *env, t_cmd_node *cmd)
 {
 	pid_t pid;
 	char *path_cmd;
+    int exit_code;
 	
     // i need cmd in argument to execute it
     if(cmd->executable == NULL)
         exit(0);
     if (is_builtin(cmd))
-        execute_builtin(env, cmd);
-    
+    {
+        exit_code = execute_builtin(env, cmd);
+        printf("exit code: %d\n", exit_code);
+        return;
+    }
     path_cmd = get_path_cmd(env, cmd);
     if (!path_cmd)
     {
@@ -53,6 +37,12 @@ void execute_simple_cmd(t_env *env, t_cmd_node *cmd)
     }
     if(execve(path_cmd, cmd->arguments, NULL) == -1)
     {
+        // case $c (variable not set) from strdup = allocate '\0' and set to cmd and first arg
+        if(cmd->arguments[0][0] == '\0')
+        {
+            free(path_cmd);
+            exit(0);
+        }
         free(path_cmd);
         exit (ft_error(cmd->executable, "error in execve"));
     }
